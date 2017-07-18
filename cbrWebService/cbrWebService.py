@@ -1,7 +1,6 @@
 from zeep import Client
 from lxml import etree, objectify
 from datetime import datetime
-from array import array
 
 def __Try_catchDecorator(myFunc):
     def wrapper(value):
@@ -257,7 +256,6 @@ class CreditOrgInfo:
                     datalist.append(creditorg)
 
         return datalist
-
 
     def Data102FullList(self, CredOrgNumbers, SymbCode, DateFrom, DateTo):
         '''Данные КО. формы 102, кратко (как list of dict) по нескольким КО'''
