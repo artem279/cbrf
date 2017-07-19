@@ -30,9 +30,7 @@ class CreditOrgInfo:
 
     def saveXmlToFile(self, xml, filename):
         '''Сохраняет объект etree._Element в xml-файл'''
-        if isinstance(xml, etree._Element):
-            pass
-        else:
+        if not isinstance(xml, etree._Element):
             raise ValueError('Is not an etree._Element node')
         xmltree = etree.tostring(xml, encoding="utf-8", method="xml", pretty_print=True)
         etree.fromstring(xmltree).getroottree().write(filename, encoding='utf-8', pretty_print=True)
@@ -77,18 +75,14 @@ class CreditOrgInfo:
 
     def CreditInfoByIntCodeExXML(self, InternalCodes):
         '''Информация о кредитной орг. по вн.коду (как XML Document) ver- 26.02.2015'''
-        if isinstance(InternalCodes, (list, tuple, set)):
-            pass
-        else:
+        if not isinstance(InternalCodes, (list, tuple, set)):
             raise ValueError('InternalCodes must be tuple, list or set!')
         root = self.client.service.CreditInfoByIntCodeXML(InternalCodes).getroottree().getroot()
         return self.CleanNameSpaces(root)
 
     def CreditInfoByIntCodeList(self, InternalCodes):
         '''Информация о кредитной орг. по вн.коду (как list or dict)'''
-        if isinstance(InternalCodes, (list, tuple, set)):
-            pass
-        else:
+        if not isinstance(InternalCodes, (list, tuple, set)):
             InternalCodes = list(InternalCodes)
         datalist = []
         for ic in InternalCodes:
@@ -140,91 +134,65 @@ class CreditOrgInfo:
 
     def Data123FormFullXML(self, RegNum, OnDate):
         '''Данные по форме 123 (как XML)'''
-        if isinstance(OnDate, datetime):
-            pass
-        else:
+        if not isinstance(OnDate, datetime):
             OnDate = datetime.strptime(OnDate, '%Y-%m-%d')
         return self.CleanNameSpaces(self.client.service.Data123FormFullXML(int(RegNum), OnDate).getroottree().getroot())
 
     def Data101FullExV2XML(self, CredOrgNumbers, IndCode, DateFrom, DateTo):
         '''Данные КО. формы 101, полностью (как XML) по нескольким КО ver 07.03.2017'''
-        if isinstance(DateFrom, datetime):
-            pass
-        else:
+        if not isinstance(DateFrom, datetime):
             DateFrom = datetime.strptime(DateFrom, '%Y-%m-%d')
 
-        if isinstance(DateTo, datetime):
-            pass
-        else:
+        if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
-        if isinstance(CredOrgNumbers, list):
-            pass
-        else:
+        if not isinstance(CredOrgNumbers, list):
             CredOrgNumbers = list(CredOrgNumbers)
         return self.CleanNameSpaces(self.client.service.Data101FullExV2XML(CredOrgNumbers, str(IndCode), DateFrom,
                                                                            DateTo).getroottree().getroot())
 
     def Data101FullV2XML(self, CredOrgNumber, IndCode, DateFrom, DateTo):
         '''Данные КО. формы 101, полностью (как XML) mod 07.03.2017'''
-        if isinstance(DateFrom, datetime):
-            pass
-        else:
+        if not isinstance(DateFrom, datetime):
             DateFrom = datetime.strptime(DateFrom, '%Y-%m-%d')
 
-        if isinstance(DateTo, datetime):
-            pass
-        else:
+        if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
         return self.CleanNameSpaces(self.client.service.Data101FullV2XML(int(CredOrgNumber), str(IndCode), DateFrom,
                                                                          DateTo).getroottree().getroot())
 
     def Data102FormExXML(self, CredOrgNumbers, SymbCode, DateFrom, DateTo):
         '''Данные КО. формы 102, кратко (как XMLDocument) по нескольким КО.'''
-        if isinstance(DateFrom, datetime):
-            pass
-        else:
+        if not isinstance(DateFrom, datetime):
             DateFrom = datetime.strptime(DateFrom, '%Y-%m-%d')
 
-        if isinstance(DateTo, datetime):
-            pass
-        else:
+        if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
-        if isinstance(CredOrgNumbers, list):
-            pass
-        else:
+        if not isinstance(CredOrgNumbers, list):
             CredOrgNumbers = list(CredOrgNumbers)
         return self.CleanNameSpaces(self.client.service.Data102FormExXML(CredOrgNumbers, int(SymbCode), DateFrom,
                                                                            DateTo).getroottree().getroot())
 
     def Data102FormXML(self, CredOrgNumber, SymbCode, DateFrom, DateTo):
         '''Данные КО. формы 102, кратко (как XMLDocument)'''
-        if isinstance(DateFrom, datetime):
-            pass
-        else:
+        if not isinstance(DateFrom, datetime):
             DateFrom = datetime.strptime(DateFrom, '%Y-%m-%d')
 
-        if isinstance(DateTo, datetime):
-            pass
-        else:
+        if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
         return self.CleanNameSpaces(self.client.service.Data102FormXML(int(CredOrgNumber), int(SymbCode), DateFrom,
                                                                          DateTo).getroottree().getroot())
 
     def Data101FullList(self, CredOrgNumbers, IndCode, DateFrom, DateTo):
         '''Данные КО. формы 101, полностью (как list of dict) по нескольким КО'''
-        if isinstance(DateFrom, datetime):
-            pass
-        else:
+        if not isinstance(DateFrom, datetime):
             DateFrom = datetime.strptime(DateFrom, '%Y-%m-%d')
 
-        if isinstance(DateTo, datetime):
-            pass
-        else:
+        if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
-        if isinstance(CredOrgNumbers, list):
-            pass
-        else:
+
+        if not isinstance(CredOrgNumbers, list):
             CredOrgNumbers = list(CredOrgNumbers)
+
         datalist = []
         for rn in CredOrgNumbers:
             data = self.Data101FullV2XML(rn, IndCode, DateFrom, DateTo)
@@ -259,18 +227,13 @@ class CreditOrgInfo:
 
     def Data102FullList(self, CredOrgNumbers, SymbCode, DateFrom, DateTo):
         '''Данные КО. формы 102, кратко (как list of dict) по нескольким КО'''
-        if isinstance(DateFrom, datetime):
-            pass
-        else:
+        if not isinstance(DateFrom, datetime):
             DateFrom = datetime.strptime(DateFrom, '%Y-%m-%d')
 
-        if isinstance(DateTo, datetime):
-            pass
-        else:
+        if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
-        if isinstance(CredOrgNumbers, list):
-            pass
-        else:
+
+        if not isinstance(CredOrgNumbers, list):
             CredOrgNumbers = list(CredOrgNumbers)
 
         datalist = []
