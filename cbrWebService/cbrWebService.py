@@ -145,6 +145,7 @@ class CreditOrgInfo:
 
         if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
+
         if not isinstance(CredOrgNumbers, list):
             CredOrgNumbers = list(CredOrgNumbers)
         return self.CleanNameSpaces(self.client.service.Data101FullExV2XML(CredOrgNumbers, str(IndCode), DateFrom,
@@ -167,6 +168,7 @@ class CreditOrgInfo:
 
         if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
+
         if not isinstance(CredOrgNumbers, list):
             CredOrgNumbers = list(CredOrgNumbers)
         return self.CleanNameSpaces(self.client.service.Data102FormExXML(CredOrgNumbers, int(SymbCode), DateFrom,
