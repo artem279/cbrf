@@ -75,16 +75,16 @@ class CreditOrgInfo:
 
     def CreditInfoByIntCodeExXML(self, InternalCodes):
         '''Информация о кредитной орг. по вн.коду (как XML Document) ver- 26.02.2015'''
-        if not isinstance(InternalCodes, (list, tuple, set)):
+        if not isinstance(InternalCodes, (list, tuple, set)) or isinstance(InternalCodes, str):
             raise ValueError('InternalCodes must be tuple, list or set!')
         root = self.client.service.CreditInfoByIntCodeXML(InternalCodes).getroottree().getroot()
         return self.CleanNameSpaces(root)
 
     def CreditInfoByIntCodeList(self, InternalCodes):
         '''Информация о кредитной орг. по вн.коду (как list or dict)'''
-        if not isinstance(InternalCodes, (list, tuple, set)):
-            InternalCodes = list(InternalCodes)
-        datalist = []
+        if not isinstance(InternalCodes, (list, tuple, set)) or isinstance(InternalCodes, str):
+            raise ValueError('InternalCodes must be tuple, list or set!')
+
         for ic in InternalCodes:
             data = self.CreditInfoByIntCodeXML(ic)
             for co in data.iter('CO'):
@@ -108,9 +108,7 @@ class CreditOrgInfo:
                 creditorg['Licenses'] = [{'LCode': getValue(row.find('LCode')),
                                           'LT': getValue(row.find('LT')),
                                           'LDate': getValue(row.find('LDate'))} for row in data.iter('LIC')]
-                datalist.append(creditorg)
-
-        return datalist
+                yield creditorg
 
     def GetOfficesXML(self, IntCode):
         '''Информация по филиальной сети кредитной орг. по вн.коду (как XML)'''
@@ -146,8 +144,8 @@ class CreditOrgInfo:
         if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
 
-        if not isinstance(CredOrgNumbers, list):
-            CredOrgNumbers = list(CredOrgNumbers)
+        if not isinstance(CredOrgNumbers, (list, tuple, set)) or isinstance(CredOrgNumbers, str):
+            raise ValueError('CredOrgNumbers must be tuple, list or set!')
         return self.CleanNameSpaces(self.client.service.Data101FullExV2XML(CredOrgNumbers, str(IndCode), DateFrom,
                                                                            DateTo).getroottree().getroot())
 
@@ -169,8 +167,8 @@ class CreditOrgInfo:
         if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
 
-        if not isinstance(CredOrgNumbers, list):
-            CredOrgNumbers = list(CredOrgNumbers)
+        if not isinstance(CredOrgNumbers, (list, tuple, set)) or isinstance(CredOrgNumbers, str):
+            raise ValueError('CredOrgNumbers must be tuple, list or set!')
         return self.CleanNameSpaces(self.client.service.Data102FormExXML(CredOrgNumbers, int(SymbCode), DateFrom,
                                                                            DateTo).getroottree().getroot())
 
@@ -192,10 +190,9 @@ class CreditOrgInfo:
         if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
 
-        if not isinstance(CredOrgNumbers, list):
-            CredOrgNumbers = list(CredOrgNumbers)
+        if not isinstance(CredOrgNumbers, (list, tuple, set)) or isinstance(CredOrgNumbers, str):
+            raise ValueError('CredOrgNumbers must be tuple, list or set!')
 
-        datalist = []
         for rn in CredOrgNumbers:
             data = self.Data101FullV2XML(rn, IndCode, DateFrom, DateTo)
             for co in data.iter():
@@ -223,9 +220,7 @@ class CreditOrgInfo:
                     creditorg['ir'] = getValue(co.find('ir'))
                     creditorg['iv'] = getValue(co.find('iv'))
                     creditorg['iitg'] = getValue(co.find('iitg'))
-                    datalist.append(creditorg)
-
-        return datalist
+                    yield creditorg
 
     def Data102FullList(self, CredOrgNumbers, SymbCode, DateFrom, DateTo):
         '''Данные КО. формы 102, кратко (как list of dict) по нескольким КО'''
@@ -235,10 +230,9 @@ class CreditOrgInfo:
         if not isinstance(DateTo, datetime):
             DateTo = datetime.strptime(DateTo, '%Y-%m-%d')
 
-        if not isinstance(CredOrgNumbers, list):
-            CredOrgNumbers = list(CredOrgNumbers)
+        if not isinstance(CredOrgNumbers, (list, tuple, set)) or isinstance(CredOrgNumbers, str):
+            raise ValueError('CredOrgNumbers must be tuple, list or set!')
 
-        datalist = []
         for rn in CredOrgNumbers:
             data = self.Data102FormXML(rn, SymbCode, DateFrom, DateTo)
             for co in data.iter():
@@ -248,6 +242,5 @@ class CreditOrgInfo:
                     creditorg['symbol'] = str(SymbCode)
                     creditorg['Date'] = getValue(co.find('DT'))
                     creditorg['value'] = getValue(co.find('val'))
-                    datalist.append(creditorg)
+                    yield creditorg
 
-        return datalist
