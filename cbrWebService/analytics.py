@@ -7,9 +7,6 @@ import json
 from . import cbrWebService
 
 
-# cbr = cbrWebService.CreditOrgInfo()
-
-
 class Metrics:
     def __init__(self):
         self.__cbr = cbrWebService.CreditOrgInfo()
