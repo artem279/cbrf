@@ -7,6 +7,9 @@ import json
 from . import cbrWebService
 
 
+# cbr = cbrWebService.CreditOrgInfo()
+
+
 class Metrics:
     def __init__(self):
         self.__cbr = cbrWebService.CreditOrgInfo()
@@ -348,3 +351,74 @@ class Metrics:
         pt = pt.stack().reset_index(name='value')
 
         return pd.merge(pt, bankframe, on='RegNum')
+
+    def clear_profit(self, regnums=None, DateFrom=None, DateTo=None):
+        '''Чистая прибыль'''
+        banks = self.__banks
+        if regnums is not None:
+            banks = [b for b in banks if b['RegNum'] in regnums]
+        if DateFrom is None or DateTo is None:
+            DateFrom = '2017-07-01'
+            DateTo = DateFrom
+        bankframe = pd.DataFrame(data=banks)
+        bankframe = bankframe.apply(pd.to_numeric, errors='ignore')
+        codes = ['70601', '70602', '70603', '70604', '70605', '70606', '70607', '70608',
+                 '70609', '70610', '70611', '70613', '70614', '70615', '70616']
+        data = [list(self.__cbr.Data101FullList(regnums, code, DateFrom, DateTo)) for code in codes]
+        data = [i for e in data for i in e]
+        frame = DataFrame(data)
+        frame = frame.apply(pd.to_numeric, errors='ignore')
+        frame.value = frame.value.fillna(frame.iitg)
+        grouped = frame[
+            ~frame.IndCode.astype(str).isin(
+                ['70606', '70607', '70608', '70609', '70610', '70611', '70614', '70616'])].groupby(
+            ['RegNum', 'Date']).value.sum().astype(np.int64)
+        pt = frame.pivot_table('value', index=['RegNum', 'Date'], columns='IndCode')
+        pt[pt.columns.values] = pt[pt.columns.values].fillna(0).astype(np.int64)
+        for x in ['70606', '70607', '70608', '70609', '70610', '70611', '70614', '70616']:
+            if int(x) not in pt.columns:
+                pt[int(x)] = 0
+        pt['clear_profit'] = grouped - pt[70606] - pt[70607] - pt[70608] - pt[70609] - pt[70610] - pt[70611] - pt[
+            70614] - pt[70616]
+        pt = pt[['clear_profit']]
+        pt = pt.stack().reset_index(name='value')
+
+        return pd.merge(pt, bankframe, on='RegNum')
+
+    def funds_of_enterprises(self, regnums=None, DateFrom=None, DateTo=None):
+        '''Средства предприятий и организаций'''
+        banks = self.__banks
+        if regnums is not None:
+            banks = [b for b in banks if b['RegNum'] in regnums]
+        if DateFrom is None or DateTo is None:
+            DateFrom = '2017-07-01'
+            DateTo = DateFrom
+        bankframe = pd.DataFrame(data=banks)
+        bankframe = bankframe.apply(pd.to_numeric, errors='ignore')
+        codes = ['40501', '40502', '40503', '40504', '40505', '40601', '40602', '40603', '40604', '40701',
+                 '40702', '40703', '40704', '40705', '40802', '40804', '40805', '40806', '40807', '40809',
+                 '40811', '40812', '40814', '40815', '40818', '40819', '20309', '20310', '41401', '41402', '41403',
+                 '41501', '41502', '41503', '41601', '41602', '41603', '41701', '41702',
+                 '41703', '41801', '41802', '41803', '41901', '41902', '41903', '42001', '42002', '42003', '42101',
+                 '42102', '42103', '42201', '42202', '42203', '42501', '42502', '42503', '43101', '43102', '43103',
+                 '43201', '43202', '43203', '43301', '43302', '43303', '43401', '43402', '43403', '43501', '43502',
+                 '43503', '43601', '43602', '43603', '43701', '43702', '43703', '43801', '43802', '43803', '43901',
+                 '43902', '43903', '44001', '44002', '44003', '47601', '47602', '52101', '52102', '52403', '41404',
+                 '41504', '41604', '41704', '41804', '41904', '42004', '42104', '42204', '42504', '43104',
+                 '43204', '43304', '43404', '43504', '43604', '43704', '43804', '43904', '44004', '52103', '41405',
+                 '41505', '41605', '41705', '41805', '41905', '42005', '42105', '42205', '42505',
+                 '43105', '43205', '43305', '43405', '43505', '43605', '43705', '43805', '43905', '44005', '52104',
+                 '41406', '41506', '41606', '41706', '41806', '41906', '42006', '42106', '42206', '42506',
+                 '43106', '43206', '43306', '43406', '43506', '43606', '43706', '43806', '43906', '44006', '52105',
+                 '41407', '41507', '41607', '41707', '41807', '41907', '42007', '42107', '42207', '42507',
+                 '43107', '43207', '43307', '43407', '43507', '43607', '43707', '43807', '43907', '44007', '52106']
+        data = [list(self.__cbr.Data101FullList(regnums, code, DateFrom, DateTo)) for code in codes]
+        data = [i for e in data for i in e]
+        frame = DataFrame(data)
+        frame = frame.apply(pd.to_numeric, errors='ignore')
+        frame.value = frame.value.fillna(frame.iitg)
+        grouped = frame.groupby(by=['RegNum', 'Date']).value.sum().unstack().stack().reset_index(name='value')
+        grouped['IndCode'] = 'funds_of_enterprises'
+        grouped['value'] = grouped['value'].astype(np.int64)
+
+        return pd.merge(grouped, bankframe, on='RegNum')
