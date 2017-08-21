@@ -422,3 +422,45 @@ class Metrics:
         grouped['value'] = grouped['value'].astype(np.int64)
 
         return pd.merge(grouped, bankframe, on='RegNum')
+
+    def passed_to_REPO(self, regnums=None, DateFrom=None, DateTo=None):
+        '''Бумаги переданные в РЕПО'''
+        banks = self.__banks
+        if regnums is not None:
+            banks = [b for b in banks if b['RegNum'] in regnums]
+        if DateFrom is None or DateTo is None:
+            DateFrom = '2017-07-01'
+            DateTo = DateFrom
+        bankframe = pd.DataFrame(data=banks)
+        bankframe = bankframe.apply(pd.to_numeric, errors='ignore')
+        codes = ['50118', '50218', '50318', '50618', '50718']
+        data = [list(self.__cbr.Data101FullList(regnums, code, DateFrom, DateTo)) for code in codes]
+        data = [i for e in data for i in e]
+        frame = DataFrame(data)
+        frame = frame.apply(pd.to_numeric, errors='ignore')
+        frame.value = frame.value.fillna(frame.iitg)
+        grouped = frame.groupby(by=['RegNum', 'Date']).value.sum().unstack().stack().reset_index(name='value')
+        grouped['IndCode'] = 'passed_to_REPO'
+        grouped['value'] = grouped['value'].astype(np.int64)
+
+        return pd.merge(grouped, bankframe, on='RegNum')
+
+    def capital_form123(self, regnums=None, onDate=None):
+        '''Капитал(по форме 123)'''
+        banks = self.__banks
+        if regnums is not None:
+            banks = [b for b in banks if b['RegNum'] in regnums]
+        if onDate is None:
+            onDate = '2017-07-01'
+        bankframe = pd.DataFrame(data=banks)
+        bankframe = bankframe.apply(pd.to_numeric, errors='ignore')
+        data = [{'Date': onDate, 'RegNum': r, 'value': cbrWebService.getValue(e.find('VALUE'))} for r in regnums for e
+                in self.__cbr.Data123FormFullXML(r, onDate).iter('F123') if
+                cbrWebService.getValue(e.find('CODE')) == '000']
+        frame = DataFrame(data)
+        frame = frame.apply(pd.to_numeric, errors='ignore')
+        frame.value = frame.value.fillna(frame.value)
+        frame['IndCode'] = 'capital_form123'
+        frame['value'] = frame['value'].astype(np.int64)
+
+        return pd.merge(frame, bankframe, on='RegNum')
